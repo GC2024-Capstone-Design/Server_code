@@ -13,8 +13,8 @@ def get_time_mode():
 
 def start_yolo(mode):
     """YOLO 모델 실행."""
-    script_path_day = "C:/Users/halim/OneDrive/바탕 화면/졸압작품/run_yolo_combined_day.py"  # 실행할 스크립트 경로
-    script_path_night = "C:/Users/halim/OneDrive/바탕 화면/졸작 관련 폴더/Code/server_yolo_code_night.py"  # 실행할 스크립트 경로
+    script_path_day = "./night_baby_detect.py"  # 실행할 스크립트 경로
+    script_path_night = "./day_baby_detect.py"  # 실행할 스크립트 경로
     print(f"Starting YOLO in {mode} mode...")
     if mode == "day":
         return subprocess.Popen(["python", script_path_day, "day"]) #여기에다가는 주간 path 입력
