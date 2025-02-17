@@ -20,6 +20,10 @@ def run_yolo_combined():
     # 추후 카메라 연결 시 밑의 코드로 변경 후 스트리밍 소스 제거
     # cap = cv2.VideoCapture(0)  # 0은 기본 웹캠을 사용
 
+    #     # 초당 프레임 계산 코드
+    # fps = cap.get(cv2.CAP_PROP_FPS)
+    # print(f"Source Video FPS: {fps}")
+
     # 초기 상태 설정
     frame_count = 0
     model1_count = 0  # supine/baby 감지 카운터
