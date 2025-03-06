@@ -1,9 +1,9 @@
-import os
 import time
 from datetime import datetime
-import subprocess
 import cv2
 import numpy as np
+from day_baby_detect import detect_baby_in_day
+from night_baby_detect import detect_baby_in_night
 
 # 밝기 기준 설정
 BRIGHTNESS_THRESHOLD = 50  # 밝기 기준값
@@ -24,20 +24,18 @@ def get_time_mode(frame):
     else:
         return "night"  # 어두우면 야간 모드
 
-def start_yolo(mode):
+def start_yolo(mode, frame):
     """YOLO 모델 실행."""
-    script_path_day = "./night_baby_detect.py"  # 실행할 스크립트 경로
-    script_path_night = "./day_baby_detect.py"  # 실행할 스크립트 경로
-    print(f"Starting YOLO in {mode} mode...")
+    print(f"Running YOLO in {mode} mode...")
     if mode == "day":
-        return subprocess.Popen(["python", script_path_day, "day"]) # 주간 path 입력
+        detect_baby_in_day(frame)  # 주간 모드에서 아기 감지
     elif mode == "night":
-        return subprocess.Popen(["python", script_path_night, "night"]) # 야간 path 입력
+        detect_baby_in_night(frame)  # 야간 모드에서 아기 감지
     else:
         print("No mode detected. Turn off the program")
-        return
 
 def main():
+    print("프로그램 시작...")
     # 카메라 초기화
     cap = cv2.VideoCapture(0)  # 파라미터 값만 바꾸면 영상/라즈베리파이 카메라 가능
 
@@ -54,9 +52,7 @@ def main():
         return
 
     current_mode = get_time_mode(frame)  # 초기 모드 설정
-    print(f"Initial mode: {current_mode}. Starting YOLO...")
-
-    process = start_yolo(current_mode)  # 첫 YOLO 프로세스 시작
+    print(f"Initial mode: {current_mode}. Running YOLO...")
 
     try:
         while True:
@@ -69,19 +65,22 @@ def main():
             new_mode = get_time_mode(frame)
 
             if new_mode != current_mode:
-                # 모드 변경 시 기존 YOLO 프로세스 종료 및 재시작
-                print(f"Mode changed to {new_mode}. Restarting YOLO...")
-                process.terminate()  # 기존 프로세스 종료
-                process.wait()  # 종료 대기
+                # 모드 변경 시 모드 변경
+                print(f"Mode changed to {new_mode}.")
                 current_mode = new_mode
-                process = start_yolo(current_mode)  # 새 프로세스 시작
+
+            start_yolo(current_mode, frame)  # 현재 모드에 따라 YOLO 실행
 
             time.sleep(10)  # 10초마다 상태 체크
 
+        # 키 입력 처리
+            key = cv2.waitKey(1) & 0xFF
+            if key == ord('q'):  # 'q' 키를 누르면 종료
+                break
+
     except KeyboardInterrupt:
         print("Stopping YOLO...")
-        process.terminate()  # 프로그램 종료 시 프로세스 종료
-        process.wait()
+        return 0
 
     cap.release()
     cv2.destroyAllWindows()

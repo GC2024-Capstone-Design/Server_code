@@ -3,7 +3,7 @@ from ultralytics import YOLO
 import time
 import requests
 
-def run_yolo_combined():
+def detect_baby_in_night(frame):
     # 모델 경로 설정
     baby_pose = "../가중치 파일 모음/colab_3000/best.pt"
     night_face = "../가중치 파일 모음/night_face/night_best.pt"
@@ -13,8 +13,8 @@ def run_yolo_combined():
     model2 = YOLO(night_face)
 
     # 스트리밍 소스 설정
-    video_path = "C:/Users/halim/OneDrive/바탕 화면/졸압작품/night baby(1) - Clipchamp로 제작.mp4"
-    cap = cv2.VideoCapture(video_path)
+    # video_path = "C:/Users/halim/OneDrive/바탕 화면/졸압작품/night baby(1) - Clipchamp로 제작.mp4"
+    # cap = cv2.VideoCapture(video_path)
 
     #현재는 스트리밍 소스가 영상으로 되어있음
     # 추후 카메라 연결 시 밑의 코드로 변경 후 스트리밍 소스 제거
@@ -33,9 +33,9 @@ def run_yolo_combined():
 
     while True:
         if not paused:
-            ret, frame = cap.read()
-            if not ret:
-                break
+            # ret, frame = cap.read()
+            # if not ret:
+                # break
 
             frame_count += 1
             baby_detected_in_frame = False  # 플래그: 한 프레임에서 한 번만 증가하도록 설정
@@ -99,8 +99,7 @@ def run_yolo_combined():
         elif paused:  # 멈춘 상태에서는 딜레이 없이 반복
             time.sleep(0.3)
 
-    cap.release()
     print("프로그램 종료.")
 
 if __name__ == "__main__":
-    run_yolo_combined()
+    detect_baby_in_night()
