@@ -63,6 +63,7 @@ def main():
 
             # 밝기 측정 후 모드 변경 여부 확인
             new_mode = get_time_mode(frame)
+            print(f"현재 모드: {new_mode}")
 
             if new_mode != current_mode:
                 # 모드 변경 시 모드 변경
@@ -71,9 +72,7 @@ def main():
 
             start_yolo(current_mode, frame)  # 현재 모드에 따라 YOLO 실행
 
-            time.sleep(10)  # 10초마다 상태 체크
-
-        # 키 입력 처리
+            # 키 입력 처리
             key = cv2.waitKey(1) & 0xFF
             if key == ord('q'):  # 'q' 키를 누르면 종료
                 break
