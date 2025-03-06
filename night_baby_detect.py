@@ -16,7 +16,7 @@ def detect_baby_in_night(frame):
     # video_path = "C:/Users/halim/OneDrive/바탕 화면/졸압작품/night baby(1) - Clipchamp로 제작.mp4"
     # cap = cv2.VideoCapture(video_path)
 
-    #현재는 스트리밍 소스가 영상으로 되어있음
+    # 현재는 스트리밍 소스가 영상으로 되어있음
     # 추후 카메라 연결 시 밑의 코드로 변경 후 스트리밍 소스 제거
     # cap = cv2.VideoCapture(0)  # 0은 기본 웹캠을 사용
 
@@ -28,7 +28,7 @@ def detect_baby_in_night(frame):
     frame_count = 0
     model1_count = 0  # supine/baby 감지 카운터
     model2_face_miss_count = 0  # 얼굴 감지 실패 카운터
-    frame_check_interval = 675  # 1초당 프레임 45fps, 675인 경우 15초. 즉 15초 간격으로 체크크
+    frame_check_interval = 10  # 300프레임마다 체크
     paused = False
 
     while True:
@@ -81,7 +81,7 @@ def detect_baby_in_night(frame):
                         print("✅ Alert sent successfully!")
                     else:
                         print(f"❌ Failed to send alert. Status code: {response.status_code}")
-                    break
+                    return
 
                 print("카운터 초기화되었습니다.")
                 frame_count = 0

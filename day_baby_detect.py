@@ -30,7 +30,7 @@ def detect_baby_in_day(frame):
     supine_or_baby_count = 0  # supine 또는 baby 감지 카운터
     prone_count = 0  # prone 감지 카운터
     face_miss_count = 0  # 얼굴 감지 실패 카운터
-    frame_check_interval = 675  # 675프레임(15초 간격) 체크
+    frame_check_interval = 10  # 675프레임(15초 간격) 체크
     paused = False
 
     while True:
@@ -106,6 +106,7 @@ def detect_baby_in_day(frame):
                 supine_or_baby_count = 0
                 prone_count = 0
                 face_miss_count = 0
+                return
 
         # 키 입력 처리
         key = cv2.waitKey(1) & 0xFF
