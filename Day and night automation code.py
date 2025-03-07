@@ -37,7 +37,8 @@ def start_yolo(mode, frame):
 def main():
     print("프로그램 시작...")
     # 카메라 초기화
-    cap = cv2.VideoCapture(0)  # 파라미터 값만 바꾸면 영상/라즈베리파이 카메라 가능
+    rtsp_url = "rtsp://172.25.84.69:8554/stream1"  # RTSP 스트림 URL
+    cap = cv2.VideoCapture(rtsp_url)
 
     if not cap.isOpened():
         print("카메라를 열 수 없습니다.")
