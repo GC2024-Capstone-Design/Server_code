@@ -5,24 +5,17 @@ import numpy as np
 from day_baby_detect import detect_baby_in_day
 from night_baby_detect import detect_baby_in_night
 
-# 밝기 기준 설정
-BRIGHTNESS_THRESHOLD = 50  # 밝기 기준값
-
-def determine_brightness(frame):
-    """
-    이미지의 밝기를 계산합니다.
-    """
-    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    brightness = np.mean(gray_frame)
-    return brightness
-
 def get_time_mode(frame):
-    """현재 밝기에 따라 주/야간 모드를 반환."""
-    brightness = determine_brightness(frame)
-    if brightness > BRIGHTNESS_THRESHOLD:
-        return "day"  # 밝으면 주간 모드
-    else:
-        return "night"  # 어두우면 야간 모드
+    b, g, r = cv2.split(frame)
+    diff_rg = np.abs(np.mean(r) - np.mean(g))
+    diff_rb = np.abs(np.mean(r) - np.mean(b))
+
+    print(f"R: {r}, G: {g}, B: {b}")  # RGB 평균 값 출력
+    
+    if diff_rg < 0 and diff_rb < 0:  # 채널 간 차이가 작다면 IR 모드로 판단
+        return 'night'
+    return 'day'
+
 
 def start_yolo(mode, frame):
     """YOLO 모델 실행."""
@@ -37,7 +30,7 @@ def start_yolo(mode, frame):
 def main():
     print("프로그램 시작...")
     # 카메라 초기화
-    rtsp_url = "rtsp://172.25.84.69:8554/stream1"  # RTSP 스트림 URL
+    rtsp_url = "rtsp://172.25.83.240:8554/stream1"  # RTSP 스트림 URL
     cap = cv2.VideoCapture(rtsp_url)
 
     if not cap.isOpened():
@@ -58,6 +51,7 @@ def main():
     try:
         while True:
             ret, frame = cap.read()
+            print("새로 실행")
             if not ret:
                 print("프레임을 가져올 수 없습니다.")
                 break

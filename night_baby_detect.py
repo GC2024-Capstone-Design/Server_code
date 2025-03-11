@@ -89,6 +89,7 @@ def detect_baby_in_night(frame):
 
                 model1_count = 0
                 model2_face_miss_count = 0
+                return
 
         # 키 입력 처리
         key = cv2.waitKey(1) & 0xFF

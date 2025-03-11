@@ -3,44 +3,35 @@ from ultralytics import YOLO
 import time
 import requests
 
-def detect_baby_in_day(frame):
+def detect_baby_in_day():
     # 모델 경로 설정
     baby_pose = "../가중치 파일 모음/colab_3000/best.pt"
-    day_face = "../가중치 파일 모음/face/best.pt"
-
-    # # 초당 프레임 계산 코드
-    # fps = cap.get(cv2.CAP_PROP_FPS)
-    # print(f"Source Video FPS: {fps}")
-
+    day_face = "C:/Users/halim/Downloads/weights.pt"
 
     # 사용할 YOLO 모델 초기화
     model1 = YOLO(baby_pose)  # 포즈 감지 모델
     model2 = YOLO(day_face)  # 얼굴 감지 모델
 
     # 스트리밍 소스 설정
-    # video_path = "C:/Users/halim/OneDrive/바탕 화면/졸압작품/night baby(1) - Clipchamp로 제작.mp4"
-    # cap = cv2.VideoCapture(video_path)
-
-    #현재는 스트리밍 소스가 영상으로 되어있음
-    # 추후 카메라 연결 시 밑의 코드로 변경 후 스트리밍 소스 제거
-    # cap = cv2.VideoCapture(0)  # 0은 기본 웹캠을 사용
+    video_path = "rtsp://172.25.83.240:8554/stream1"
+    cap = cv2.VideoCapture(video_path)
 
     # 초기 상태 설정
     frame_count = 0
     supine_or_baby_count = 0  # supine 또는 baby 감지 카운터
     prone_count = 0  # prone 감지 카운터
     face_miss_count = 0  # 얼굴 감지 실패 카운터
-    frame_check_interval = 10  # 675프레임(15초 간격) 체크
+    frame_check_interval = 675  # 675프레임(15초 간격) 체크
     paused = False
 
     while True:
         if not paused:
-            # ret, frame = cap.read()
-            # if not ret:
-                # break
+            ret, frame = cap.read()
+            if not ret:
+                break
 
             frame_count += 1
-            supine_or_baby_detected = False  # supine 또는 baby 감지 플래그, 중복 체크 방지용용
+            supine_or_baby_detected = False  # supine 또는 baby 감지 플래그, 중복 체크 방지용
             prone_detected = False  # prone 감지 플래그
 
             # 포즈 감지
@@ -66,7 +57,7 @@ def detect_baby_in_day(frame):
                 cls = box.cls.numpy()[0]
                 label = model2.names[int(cls)]
 
-                if label == "baby_night":
+                if label in ["babycrying", "babynormal", "babysmiling"]:
                     face_detected = True
                     break
 
@@ -77,8 +68,6 @@ def detect_baby_in_day(frame):
             # 675프레임마다 조건 확인
             if frame_count % frame_check_interval == 0:
                 # 조건 1: supine 또는 baby 상태인데 얼굴이 지속적으로 감지되지 않는 경우
-                # supine_or_baby_count 변수: 아기/포즈의 확실성, 높일수록 아기일 가능성 증가
-                # face_miss_count 변수: 얼굴이 인식되지 않은 프레임의 개수
                 if supine_or_baby_count >= 500 and face_miss_count >= 450:
                     paused = True
                     print("🚨 위험 상황: 침구류로 얼굴이 덮였을 가능성")
@@ -106,7 +95,7 @@ def detect_baby_in_day(frame):
                 supine_or_baby_count = 0
                 prone_count = 0
                 face_miss_count = 0
-                return
+                continue
 
         # 키 입력 처리
         key = cv2.waitKey(1) & 0xFF
@@ -118,6 +107,8 @@ def detect_baby_in_day(frame):
             time.sleep(0.3)
 
     print("프로그램 종료.")
+    cap.release()
+    cv2.destroyAllWindows()
 
 if __name__ == "__main__":
     detect_baby_in_day()
