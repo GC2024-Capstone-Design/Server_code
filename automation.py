@@ -14,7 +14,7 @@ def get_time_mode(frame):
     print(f"Mean R: {mean_r}, Mean G: {mean_g}, Mean B: {mean_b}")  # RGB 평균 값 출력
 
     # 빨간색 채널의 평균 값이 특정 임계값 이상이고, 다른 채널보다 현저히 높으면 야간 모드로 판단
-    if mean_r > 150 and (mean_r - mean_g) > 50 and (mean_r - mean_b) > 50:
+    if mean_g < 100:
         return 'night'
     return 'day'
 
@@ -195,9 +195,11 @@ def main():
                 current_mode = get_time_mode(frame)
                 print(f"Mode rechecked at frame {frame_count}: {current_mode}")
 
+            # 현재 프레임을 창으로 표시
+            cv2.imshow('auto', frame)
+            cv2.waitKey(1)
+
             if current_mode == "day":
-                cv2.imshow('Day Mode Frame', frame)
-                cv2.waitKey(1)
                 detect_baby_in_day(frame)
             else:
                 detect_baby_in_night(frame)

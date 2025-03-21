@@ -3,32 +3,32 @@ from ultralytics import YOLO
 import time
 import requests
 
-def detect_baby_in_day():
+def detect_baby_in_day(frame):
     # 모델 경로 설정
-    baby_pose = "../가중치 파일 모음/colab_3000/best.pt"
-    day_face = "C:/Users/halim/Downloads/weights.pt"
+    baby_pose = "../best.pt"
+    day_face = "../best.pt"
 
     # 사용할 YOLO 모델 초기화
     model1 = YOLO(baby_pose)  # 포즈 감지 모델
     model2 = YOLO(day_face)  # 얼굴 감지 모델
 
     # 스트리밍 소스 설정
-    video_path = "rtsp://172.25.83.240:8554/stream1"
-    cap = cv2.VideoCapture(video_path)
+    # video_path = "rtsp://172.25.83.240:8554/stream1"
+    # cap = cv2.VideoCapture(video_path)
 
     # 초기 상태 설정
     frame_count = 0
     supine_or_baby_count = 0  # supine 또는 baby 감지 카운터
     prone_count = 0  # prone 감지 카운터
     face_miss_count = 0  # 얼굴 감지 실패 카운터
-    frame_check_interval = 675  # 675프레임(15초 간격) 체크
+    frame_check_interval = 10  # 675프레임(15초 간격) 체크
     paused = False
 
     while True:
         if not paused:
-            ret, frame = cap.read()
-            if not ret:
-                break
+            # ret, frame = cap.read()
+            # if not ret:
+                # break
 
             frame_count += 1
             supine_or_baby_detected = False  # supine 또는 baby 감지 플래그, 중복 체크 방지용
@@ -95,7 +95,9 @@ def detect_baby_in_day():
                 supine_or_baby_count = 0
                 prone_count = 0
                 face_miss_count = 0
-                continue
+                
+                print("day 종료")
+                return
 
         # 키 입력 처리
         key = cv2.waitKey(1) & 0xFF

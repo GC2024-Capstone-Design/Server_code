@@ -5,8 +5,8 @@ import requests
 
 def detect_baby_in_night(frame):
     # 모델 경로 설정
-    baby_pose = "../가중치 파일 모음/colab_3000/best.pt"
-    night_face = "../가중치 파일 모음/night_face/night_best.pt"
+    baby_pose = "../best.pt"
+    night_face = "../best.pt"
 
     # 사용할 YOLO 모델 초기화
     model1 = YOLO(baby_pose)
