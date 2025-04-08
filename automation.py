@@ -18,9 +18,19 @@ def get_time_mode(frame):
         return 'night'
     return 'day'
 
+
+def draw_boxes(frame, results, model, color):
+    for box in results[0].boxes:
+        cls = box.cls.numpy()[0]
+        label = model.names[int(cls)]
+        conf = box.conf.numpy()[0]
+        x1, y1, x2, y2 = map(int, box.xyxy.numpy()[0])
+        cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+        cv2.putText(frame, f"{label} {conf:.2f}", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, color, 2)
+
 def detect_baby_in_day(frame):
     # 모델 경로 설정
-    baby_pose = "../best.pt"
+    baby_pose = "../3000_best.pt"
     day_face = "../best.pt"
 
     # 사용할 YOLO 모델 초기화
@@ -41,6 +51,7 @@ def detect_baby_in_day(frame):
 
     # 포즈 감지
     results1 = model1(frame)
+    draw_boxes(frame, results1, model1, (0, 255, 0))  # 경계 상자 그리기 (초록색)
     for box in results1[0].boxes:
         cls = box.cls.numpy()[0]
         label = model1.names[int(cls)]
@@ -57,6 +68,7 @@ def detect_baby_in_day(frame):
 
     # 얼굴 인식
     results2 = model2(frame)
+    draw_boxes(frame, results2, model2, (0, 255, 0))  # 경계 상자 그리기 (초록색)
     face_detected = False
     for box in results2[0].boxes:
         cls = box.cls.numpy()[0]
@@ -99,12 +111,15 @@ def detect_baby_in_day(frame):
 
 def detect_baby_in_night(frame):
     # 모델 경로 설정
-    baby_pose = "../best.pt"
-    night_face = "../best.pt"
+    baby_pose = "../3000_best.pt"
+    night_face = "../night_best.pt"
 
     # 사용할 YOLO 모델 초기화
     model1 = YOLO(baby_pose)
     model2 = YOLO(night_face)
+
+    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    gray_frame = cv2.cvtColor(gray_frame, cv2.COLOR_GRAY2BGR)
 
     # 초기 상태 설정
     frame_count = 0
@@ -117,7 +132,8 @@ def detect_baby_in_night(frame):
     baby_detected_in_frame = False  # 플래그: 한 프레임에서 한 번만 증가하도록 설정
 
     # 포즈 탐지
-    results1 = model1(frame)
+    results1 = model1(gray_frame)
+    draw_boxes(frame, results1, model1, (0, 255, 0))  # 경계 상자 그리기 (초록색)
     for box in results1[0].boxes:
         cls = box.cls.numpy()[0]
         label = model1.names[int(cls)]
@@ -125,10 +141,11 @@ def detect_baby_in_night(frame):
         if label == "baby" and not baby_detected_in_frame:
             model1_count += 1
             baby_detected_in_frame = True  # 플래그를 True로 설정하여 중복 증가 방지
-            print("baby_count 증가, model1_count의 수: {}".format(model1_count))
+            print("야간 아기 인식 추가: {}".format(model1_count))
 
     # 얼굴 인식
-    results2 = model2(frame)
+    results2 = model2(gray_frame)
+    draw_boxes(frame, results2, model2, (255, 0, 0))  # 경계 상자 그리기 (파란색)
     face_detected = False
     for box in results2[0].boxes:
         cls = box.cls.numpy()[0]
@@ -162,15 +179,19 @@ def detect_baby_in_night(frame):
 
 def main():
     print("프로그램 시작...")
+    rtsp_url = "rtsp://172.16.49.161:8554/stream1"
+    cap = cv2.VideoCapture(rtsp_url)
     # 비디오 파일 경로
-    video_path = "/Users/kwonhalim/Desktop/capstone_design/주_야_합본.mp4"
-    cap = cv2.VideoCapture(video_path)
+    # video_path = "/Users/kwonhalim/Desktop/capstone_design/야간.mp4"
+    # cap = cv2.VideoCapture(video_path)
+    cap = cv2.VideoCapture(rtsp_url)  # RTSP 스트림 열기
 
     if not cap.isOpened():
         print("비디오 파일을 열 수 없습니다.")
         return
 
     print("비디오가 실행 중입니다. 'q'를 눌러 종료하세요.")
+
 
     # 첫 번째 프레임을 가져와서 초기 모드 설정
     ret, frame = cap.read()
@@ -195,15 +216,21 @@ def main():
                 current_mode = get_time_mode(frame)
                 print(f"Mode rechecked at frame {frame_count}: {current_mode}")
 
-            # 현재 프레임을 창으로 표시
-            cv2.imshow('auto', frame)
-            cv2.waitKey(1)
 
+
+            # 현재 프레임을 흑백으로 변환
+            gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            gray_frame_3channel = cv2.cvtColor(gray_frame, cv2.COLOR_GRAY2BGR)  # YOLO는 3채널 입력을 요구
+
+
+            # 현재 프레임을 창으로 표시
             if current_mode == "day":
                 detect_baby_in_day(frame)
             else:
                 detect_baby_in_night(frame)
 
+            cv2.imshow('auto', gray_frame_3channel)
+            cv2.imshow('original', frame)
             frame_count += 1  # 프레임 카운터 증가
 
             # 키 입력 처리
