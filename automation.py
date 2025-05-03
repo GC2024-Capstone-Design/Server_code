@@ -41,7 +41,7 @@ def detect_baby_in_day(frame):
     supine_or_baby_count = 0  # supine 또는 baby 감지 카운터
     prone_count = 0  # prone 감지 카운터
     face_miss_count = 0  # 얼굴 감지 실패 카운터
-    frame_check_interval = 10  # 675프레임(15초 간격) 체크
+    frame_check_interval = 3000  # 675프레임(15초 간격) 체크
     paused = False
 
     frame_count += 1
@@ -86,6 +86,7 @@ def detect_baby_in_day(frame):
         # 조건 1: supine 또는 baby 상태인데 얼굴이 지속적으로 감지되지 않는 경우
         if supine_or_baby_count >= 500 and face_miss_count >= 450:
             print("🚨 위험 상황: 침구류로 얼굴이 덮였을 가능성")
+
         # 조건 2: prone 상태가 지속되는 경우
         if prone_count >= 300:
             print("🚨 위험 상황: 아기가 엎드린 상태로 위험")
