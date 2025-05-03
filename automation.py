@@ -86,11 +86,9 @@ def detect_baby_in_day(frame):
         # 조건 1: supine 또는 baby 상태인데 얼굴이 지속적으로 감지되지 않는 경우
         if supine_or_baby_count >= 500 and face_miss_count >= 450:
             print("🚨 위험 상황: 침구류로 얼굴이 덮였을 가능성")
-            response = requests.post("http://localhost:8000/alert", json={"status": "danger", "reason": "face_cover"})
         # 조건 2: prone 상태가 지속되는 경우
         if prone_count >= 300:
             print("🚨 위험 상황: 아기가 엎드린 상태로 위험")
-            response = requests.post("http://localhost:8000/alert", json={"status": "danger", "reason": "prone_position"})
 
         # 카운터 초기화
         print("카운터 초기화")
