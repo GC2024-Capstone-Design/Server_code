@@ -1,9 +1,8 @@
-import time
-from datetime import datetime
 import cv2
 import numpy as np
-from ultralytics import YOLO
 import requests
+from ultralytics import YOLO
+
 
 def get_time_mode(frame):
     b, g, r = cv2.split(frame)
@@ -88,19 +87,10 @@ def detect_baby_in_day(frame):
         if supine_or_baby_count >= 500 and face_miss_count >= 450:
             print("🚨 위험 상황: 침구류로 얼굴이 덮였을 가능성")
             response = requests.post("http://localhost:8000/alert", json={"status": "danger", "reason": "face_cover"})
-            if response.status_code == 200:
-                print("✅ Alert sent successfully!")
-            else:
-                print(f"❌ Failed to send alert. Status code: {response.status_code}")
-
         # 조건 2: prone 상태가 지속되는 경우
         if prone_count >= 300:
             print("🚨 위험 상황: 아기가 엎드린 상태로 위험")
             response = requests.post("http://localhost:8000/alert", json={"status": "danger", "reason": "prone_position"})
-            if response.status_code == 200:
-                print("✅ Alert sent successfully!")
-            else:
-                print(f"❌ Failed to send alert. Status code: {response.status_code}")
 
         # 카운터 초기화
         print("카운터 초기화")
@@ -119,7 +109,7 @@ def detect_baby_in_night(frame):
     model2 = YOLO(night_face)
 
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    gray_frame = cv2.cvtColor(gray_frame, cv2.COLOR_GRAY2BGR)
+    # gray_frame = cv2.cvtColor(gray_frame, cv2.COLOR_GRAY2BGR)
 
     # 초기 상태 설정
     frame_count = 0
@@ -164,11 +154,6 @@ def detect_baby_in_night(frame):
         if model1_count >= 500 and model2_face_miss_count >= 450:
             print("baby_count:{}, baby_night_face_detect:{}".format(model1_count, model2_face_miss_count))
             print("🚨 Baby In Danger! Sending alert to server...")
-            response = requests.post("http://localhost:8000/alert", json={"status": "danger"})
-            if response.status_code == 200:
-                print("✅ Alert sent successfully!")
-            else:
-                print(f"❌ Failed to send alert. Status code: {response.status_code}")
 
         print("카운터 초기화되었습니다.")
         frame_count = 0
@@ -179,7 +164,7 @@ def detect_baby_in_night(frame):
 
 def main():
     print("프로그램 시작...")
-    rtsp_url = "rtsp://172.16.49.161:8554/stream1"
+    rtsp_url = "rtsp://172.25.83.240:8554/stream1"
     cap = cv2.VideoCapture(rtsp_url)
     # 비디오 파일 경로
     # video_path = "/Users/kwonhalim/Desktop/capstone_design/야간.mp4"

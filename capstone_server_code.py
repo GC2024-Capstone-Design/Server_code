@@ -1,8 +1,8 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.responses import JSONResponse
-import asyncio
-import uvicorn
 import json
+
+import uvicorn
+from fastapi import FastAPI, WebSocket, WebSocket
+from fastapi.responses import JSONResponse
 
 app = FastAPI()
 
@@ -16,7 +16,7 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             await websocket.receive_text()  # 웹소켓 연결 유지용
-    except WebSocketDisconnect:
+    except WebSocket:
         connected_clients.remove(websocket)
 
 @app.post("/alert")
